@@ -1,4 +1,7 @@
+//引入react需要的组件
 import React, { Component } from 'react';
+//引入cesium需要的文件  这里引用的是Cesium的库，你以后所有的东西都从这个库中调用
+//import Viewer from "。./Build/Cesium/Cesium.js
 import Viewer from "cesium/Source/Widgets/Viewer/Viewer";
 import HorizontalOrigin from 'cesium/Source/Scene/HorizontalOrigin'
 import VerticalOrigin from 'cesium/Source/Scene/VerticalOrigin'
@@ -126,37 +129,43 @@ class Flonglat extends Component{
 
 
 
-
-        var viewer = new Viewer('cesiumContainer', {
-            selectionIndicator: false,
-            infoBox: false
+//
+        var viewer = new Viewer('cesiumContainer', {//从cesium引入视图后，在视图内显示球体
+            selectionIndicator: false,//
+            infoBox: false// //是否显示点击要素之后显示的信息
         });
 
-        var scene = viewer.scene;
+        var scene = viewer.scene; // 得到当前三维场景
         if (!scene.pickPositionSupported) {
-            console.log('This browser does not support pickPosition.');
+            console.log('no scane');
         }
 
         var handler;
-
-        window.Sandcastle.addDefaultToolbarButton('Show Cartographic Position on Mouse Over', function () {
+  //显示鼠标所在位置的制图，移动鼠标将屏幕坐标转换为图上的经纬度坐标
+        window.Sandcastle.addDefaultToolbarButton('If the mouse is over the billboard, change its scale and color', function () {
+          //添加实体对象
             var entity = viewer.entities.add({
                 label: {
                     show: false,
                     showBackground: true,
-                    font: '14px monospace',
+                    font: '12px monospace',
                     horizontalOrigin: HorizontalOrigin.LEFT,
                     verticalOrigin: VerticalOrigin.TOP,
+                    //表示一个二维笛卡尔坐标系，也就是直角坐标系（屏幕坐标系）
                     pixelOffset: new Cartesian2(15, 0)
+
                 }
             });
 
-            // Mouse over the globe to see the cartographic position
+            // 将鼠标悬停在地球上以查看制图位置
             handler = new ScreenSpaceEventHandler(scene.canvas);
             handler.setInputAction(function (movement) {
+                //获取相机
                 var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
                 if (cartesian) {
+                  // 经纬度坐标转地理坐标
                     var cartographic = Cartographic.fromCartesian(cartesian);
+
                     var longitudeString = Math.toDegrees(cartographic.longitude).toFixed(2);
                     var latitudeString = Math.toDegrees(cartographic.latitude).toFixed(2);
 
@@ -171,21 +180,27 @@ class Flonglat extends Component{
             }, ScreenSpaceEventType.MOUSE_MOVE);
         });
 
-        window.Sandcastle.addToolbarButton('Pick Entity', function () {
+
+
+       //显示logo展板
+        window.Sandcastle.addToolbarButton('pick entities', function () {
             var entity = viewer.entities.add({
+               //表示一个三维笛卡尔坐标系，也是直角坐标系(就是真实世界的坐标系)
+               //经纬度坐标转世界坐标
                 position: Cartesian3.fromDegrees(-75.59777, 40.03883),
+
                 billboard: {
-                    image: '../images/Cesium_Logo_overlay.png'
+                    image: '../cesium/Apps/Sandcastle/images/Cesium_Logo_overlay.png'
                 }
             });
 
-            // If the mouse is over the billboard, change its scale and color
+            // 如果鼠标在展板上，改变它的比例和颜色
             handler = new ScreenSpaceEventHandler(scene.canvas);
             handler.setInputAction(function (movement) {
                 var pickedObject = scene.pick(movement.endPosition);
                 if (defined(pickedObject) && (pickedObject.id === entity)) {
-                    entity.billboard.scale = 2.0;
-                    entity.billboard.color = Color.YELLOW;
+                    entity.billboard.scale = 2.0;//展板实体放大2倍
+                    entity.billboard.color = Color.YELLOW;//展板颜色i变为黄色
                 } else {
                     entity.billboard.scale = 1.0;
                     entity.billboard.color = Color.WHITE;
@@ -193,80 +208,17 @@ class Flonglat extends Component{
             }, ScreenSpaceEventType.MOUSE_MOVE);
         });
 
-        window.Sandcastle.addToolbarButton('Drill-Down Picking', function () {
-            var pickedEntities = new EntityCollection();
-            var pickColor = Color.YELLOW.withAlpha(0.5);
-
-            function makeProperty(entity, color) {
-                var colorProperty = new CallbackProperty(function (time, result) {
-                    if (pickedEntities.contains(entity)) {
-                        return pickColor.clone(result);
-                    }
-                    return color.clone(result);
-                }, false);
-
-                entity.polygon.material = new ColorMaterialProperty(colorProperty);
-            }
-
-            var red = viewer.entities.add({
-                polygon: {
-                    hierarchy: Cartesian3.fromDegreesArray([-70.0, 30.0,
-                        -60.0, 30.0,
-                        -60.0, 40.0,
-                        -70.0, 40.0]),
-                    height: 0
-                }
-            });
-            makeProperty(red, Color.RED.withAlpha(0.5));
-
-            var blue = viewer.entities.add({
-                polygon: {
-                    hierarchy: Cartesian3.fromDegreesArray([-75.0, 34.0,
-                        -63.0, 34.0,
-                        -63.0, 40.0,
-                        -75.0, 40.0]),
-                    height: 0
-                }
-            });
-            makeProperty(blue, Color.BLUE.withAlpha(0.5));
-
-            var green = viewer.entities.add({
-                polygon: {
-                    hierarchy: Cartesian3.fromDegreesArray([-67.0, 36.0,
-                        -55.0, 36.0,
-                        -55.0, 30.0,
-                        -67.0, 30.0]),
-                    height: 0
-                }
-            });
-            makeProperty(green, Color.GREEN.withAlpha(0.5));
-
-            // Move the primitive that the mouse is over to the top.
-            handler = new ScreenSpaceEventHandler(scene.canvas);
-            handler.setInputAction(function (movement) {
-                // get an array of all primitives at the mouse position
-                var pickedObjects = scene.drillPick(movement.endPosition);
-                if (defined(pickedObjects)) {
-                    //Update the collection of picked entities.
-                    pickedEntities.removeAll();
-                    for (var i = 0; i < pickedObjects.length; ++i) {
-                        var entity = pickedObjects[i].id;
-                        pickedEntities.add(entity);
-                    }
-                }
-
-            }, ScreenSpaceEventType.MOUSE_MOVE);
-        });
-
+        
+//选取一个具体的位置，在上面放上一辆牛奶车，可以实时移动鼠标查看经纬度及海拔盖度
         window.Sandcastle.addToolbarButton('Pick position', function () {
             var modelEntity = viewer.entities.add({
                 name: 'milktruck',
                 position: Cartesian3.fromDegrees(-123.0744619, 44.0503706),
                 model: {
-                    uri: '../../SampleData/models/CesiumMilkTruck/CesiumMilkTruck-kmc.gltf'
+                    uri: '../cesium/Apps/SampleData/models/CesiumMilkTruck/CesiumMilkTruck-kmc.glb'
                 }
             });
-            viewer.zoomTo(modelEntity);
+            viewer.zoomTo(modelEntity);//直接定位到模型试题具体位置
 
             var labelEntity = viewer.entities.add({
                 label: {
@@ -279,7 +231,8 @@ class Flonglat extends Component{
                 }
             });
 
-            // Mouse over the globe to see the cartographic position
+            // 53 / 5000
+         //将鼠标悬停在地球上以查看地图位置
             handler = new ScreenSpaceEventHandler(scene.canvas);
             handler.setInputAction(function (movement) {
 
@@ -291,7 +244,7 @@ class Flonglat extends Component{
                     if (scene.pickPositionSupported && defined(pickedObject) && pickedObject.id === modelEntity) {
                         var cartesian = viewer.scene.pickPosition(movement.endPosition);
 
-                        if (defined(cartesian)) {
+                        if (defined(cartesian)) {//defined引入的一个函数作用 判断cartesian值是否存在
                             var cartographic = Cartographic.fromCartesian(cartesian);
                             var longitudeString = Math.toDegrees(cartographic.longitude).toFixed(2);
                             var latitudeString = Math.toDegrees(cartographic.latitude).toFixed(2);
@@ -299,6 +252,8 @@ class Flonglat extends Component{
 
                             labelEntity.position = cartesian;
                             labelEntity.label.show = true;
+
+                            //屏幕坐标与世界坐标的转换
                             labelEntity.label.text =
                                 'Lon: ' + ('   ' + longitudeString).slice(-7) + '\u00B0' +
                                 '\nLat: ' + ('   ' + latitudeString).slice(-7) + '\u00B0' +

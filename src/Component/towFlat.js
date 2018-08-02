@@ -24,11 +24,11 @@ class twoFlat extends Component{
 
     componentDidMount() {
         var viewer = new Viewer('cesiumContainer', {
-            infoBox: false,
+            infoBox: false,//    是否显示点击要素之后显示的信息
             selectionIndicator: false
         });
         var scene = viewer.scene;
-
+//选择框选项
         var clipObjects = ['BIM', 'Point Cloud', 'Instanced', 'Model'];
         var viewModel = {
             debugBoundingVolumesEnabled : false,
@@ -40,8 +40,12 @@ class twoFlat extends Component{
         var targetY = 0.0;
         var planeEntities = [];
         var selectedPlane;
-
-// Select plane when mouse down
+          var longitude = document.getElementById('long');
+           var latitude = document.getElementById('lat');
+           var altitude = document.getElementById('alt');
+ 
+            
+   // 点击选择模型
         var downHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
         downHandler.setInputAction(function(movement) {
             var pickedObject = scene.pick(movement.position);
@@ -55,7 +59,7 @@ class twoFlat extends Component{
             }
         }, ScreenSpaceEventType.LEFT_DOWN);
 
-// Release plane on mouse up
+// 释放鼠标所做的工作
         var upHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
         upHandler.setInputAction(function() {
             if (defined(selectedPlane)) {
@@ -66,7 +70,7 @@ class twoFlat extends Component{
 
             scene.screenSpaceCameraController.enableInputs = true;
         }, ScreenSpaceEventType.LEFT_UP);
-
+//移动鼠标工作
         var moveHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
         moveHandler.setInputAction(function(movement) {
             if (defined(selectedPlane)) {
@@ -74,7 +78,7 @@ class twoFlat extends Component{
                 targetY += deltaY;
             }
         }, ScreenSpaceEventType.MOUSE_MOVE);
-
+//定位模型位置
         var scratchPlane = new ClippingPlane(Cartesian3.UNIT_X, 0.0);
         function createPlaneUpdateFunction(plane, transform) {
             return function () {
@@ -84,6 +88,7 @@ class twoFlat extends Component{
         }
 
         var tileset;
+      //  加载瓦片
         function loadTileset(url) {
             var clippingPlanes = [
                 new ClippingPlane(new Cartesian3(0.0, 0.0, -1.0), -100.0)
@@ -96,7 +101,9 @@ class twoFlat extends Component{
                     edgeWidth : viewModel.edgeStylingEnabled ? 1.0 : 0.0
                 })
             }));
-
+     longitude.innerHTML = '-123.433650';
+             latitude.innerHTML = '31.361800';
+             altitude.innerHTML = '100.0';
             tileset.debugShowBoundingVolume = viewModel.debugBoundingVolumesEnabled;
             return tileset.readyPromise.then(function() {
                 var boundingSphere = tileset.boundingSphere;
@@ -140,7 +147,9 @@ class twoFlat extends Component{
                 return modelEntityClippingPlanes;
             }
 
-            var position = Cartesian3.fromDegrees(-123.0744619, 44.0503706, 100.0);
+            var position = Cartesian3.fromDegrees(-123.433650, 31.361800, 100.0);
+            
+
             var heading = Math.toRadians(135.0);
             var pitch = 0.0;
             var roll = 0.0;
@@ -177,11 +186,11 @@ class twoFlat extends Component{
             }
         }
 
-// Power Plant design model provided by Bentley Systems
+// 提供设计模型
         var bimUrl = IonResource.fromAssetId(3837);
         var pointCloudUrl = IonResource.fromAssetId(3838);
         var instancedUrl = IonResource.fromAssetId(3876);
-        var modelUrl = '../../../../Apps/SampleData/models/CesiumAir/Cesium_Air.glb';
+        var modelUrl ='../cesium/Apps/SampleData/models/CesiumAir/Cesium_Air.glb';
 
         loadTileset(bimUrl);
 
@@ -205,6 +214,9 @@ class twoFlat extends Component{
                 });
             } else {
                 loadModel(modelUrl);
+
+
+                
             }
         });
 
@@ -246,8 +258,15 @@ class twoFlat extends Component{
                 <div id="toolbar">
                     <select data-bind="options: exampleTypes, value: currentExampleType"></select>
                     <input type="checkbox" value="false" data-bind="checked: debugBoundingVolumesEnabled, valueUpdate: 'input'"/> Show bounding volume
-                        <input type="checkbox" value="true" data-bind="checked: edgeStylingEnabled, valueUpdate: 'input'"/> Enable edge styling
+                        <input type="checkbox" value="true" data-bind="checked: edgeStylingEnabled, valueUpdate: 'input'"/> Enable edge stylin
                 </div>
+                <div id="towdata">
+               纬度:<span id="long"></span>
+               <br/>
+               经度:<span  id="lat"></span>
+                <br/>
+               海拔：<span id="alt"></span>
+               </div>
             </div>
         )
     }

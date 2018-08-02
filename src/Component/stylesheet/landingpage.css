@@ -30,7 +30,7 @@ a.more:hover {
 .questions { font-size:.7em; text-align:center; }
 .code { width:470px; }
 .clear { clear:both; }
-.example-1 {width:420px; height:370px; margin-top:10px;}
+.example-1 {width:700px; height:330px; position:absolute;top:10px;opacity:1;left:150px;}
 .showcase, .plugin { display:inline-block; width:262px; height:175px;  background:rgba(0,0,0,.2); opacity:.9; -webkit-transition:.3s ease all;transition:.3s ease all; transition:.3s ease all;}
 .plugin, .showcase { margin-left:6px; }
 
@@ -104,15 +104,17 @@ a.more:hover {
   -webkit-transition:.3s ease all;
   -moz-transition:.3s ease all;
   transition:.3s ease all;
- 
+ opacity:1;
   border-bottom:1px solid rgba(255,0,0,.6);
  
 }
 #heatmap {
-  width:100%;
+  width:80%;
   height:100%;
-  background: url("./楼宇.jpg");
+  /*background: url("./楼宇.jpg");*/
   opacity:1;
+
+  position:absolute;
  
   
 }
@@ -125,11 +127,8 @@ a.more:hover {
 }
 .in-email { font-size:1em; padding:6px; margin-top:2px; float:left; }
 .cta-in { width:500px; margin:auto; margin-top:20px; margin-bottom:20px; text-align:center;}
-
-
 .heatmap-canvas{
-  
-   border-radius:100px;
-   background: none;
-   
+
+
 }
+

@@ -288,7 +288,19 @@ color: red;
 text-align: left;
 padding:3px;
 opacity:1; 
-top:300px;
 font:700 18px/40px "simsun";
+position:absolute;
+top:0px;
+}
+#towdata{
+
+  width:160px;
+   height:140px ;
+   color:black;
+   top:130px;
+   position:absolute;
+   background-color: white;
+   font:700 16px/30px "simsun";
+   text-align: left;
 
 }

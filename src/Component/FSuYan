@@ -1,0 +1,24 @@
+import React, { Component } from 'react';
+import Viewer from "cesium/Source/Widgets/Viewer/Viewer";
+
+import Cesium3DTileset from "cesium/Source/Scene/Cesium3DTileset";
+
+import IonResource from "cesium/Source/Core/IonResource";
+
+
+class FGlobal extends Component{
+	componentDidMount() { 	
+
+
+	}
+
+	render(){
+		return(
+			<div>
+				<div id="cesiumContainer" ref={ element => this.cesiumContainer = element }/>
+			</div>
+		)
+	}
+}
+
+export default FGlobal
